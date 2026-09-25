@@ -1,0 +1,36 @@
+services:
+  bot:
+    image: reelshift-graph:latest
+    container_name: reelshift-graph-anna2
+    restart: unless-stopped
+    user: "992:982"
+    group_add:
+      - "101"
+    environment:
+      REELSHIFT_DATA_DIR: /data
+      TZ: America/New_York
+      TELEGRAM_API_BASE_URL: http://telegram_bot_api:8081
+    volumes:
+      - /opt/reelshift-graph/deployments/anna2:/data:rw
+      - /opt/reelshift-graph/app-anna2:/app:ro
+      - reelshift_telegram-bot-api-data:/var/lib/telegram-bot-api:ro
+    networks:
+      - reelshift_default
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 1G
+
+volumes:
+  reelshift_telegram-bot-api-data:
+    external: true
+
+networks:
+  reelshift_default:
+    external: true
