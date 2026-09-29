@@ -600,7 +600,16 @@ async def cmd_igcampaign(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # All-or-nothing: fail cleanly if fewer than N fresh videos available.
     # No source configured → old manual behavior (backward compat).
     source_cfg = sources_mod.get_source_config()
-    videos_to_pull = igcampaign_n if igcampaign_n else 3
+    # Smart content pull: if SKIP_VARIANTS=1 (no ffmpeg transforms),
+    # each account needs UNIQUE source videos to avoid IG duplicate detection.
+    # If SKIP_VARIANTS=0, ffmpeg makes each variant unique — shared videos are fine.
+    _ppa_for_pull = igcampaign_n if igcampaign_n else len(bot_cfg.get("windows", []))
+    if os.getenv("SKIP_VARIANTS") == "1" and _ppa_for_pull:
+        _num_accs_pull = len(accounts_mod.list_accounts())
+        videos_to_pull = _num_accs_pull * _ppa_for_pull
+        log.info(f"SKIP_VARIANTS=1: pulling {videos_to_pull} videos ({_num_accs_pull} accounts x {_ppa_for_pull} posts — unique content per account)")
+    else:
+        videos_to_pull = igcampaign_n if igcampaign_n else 3
     pulled_count = 0
     if source_cfg:
         pull_status = await update.message.reply_text(

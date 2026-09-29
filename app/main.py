@@ -116,13 +116,17 @@ async def run_bot():
             _gen_fn = app.bot_data.get("_run_variant_generation")
             _ls = loop_mod.get_state()
             _chat_id = _ls.get("chat_id") if _ls else None
+            _loop_n = _ls.get("N") if _ls else None
+            if _loop_n:
+                app.bot_data["igcampaign_n"] = _loop_n
             if not _chat_id:
                 _chat_id = cfg.get("allowed_telegram_user_ids", [8710485277])[0]
             if _gen_fn and _chat_id:
                 sched.scheduler.add_job(
-                    lambda: asyncio.ensure_future(_gen_fn(app, _chat_id)),
+                    _gen_fn,
                     trigger="date",
                     run_date=datetime.now() + timedelta(seconds=15),
+                        args=[app, _chat_id],
                     id="resume_variant_gen",
                     replace_existing=True,
                 )

@@ -235,7 +235,7 @@ def build_queue(accounts, num_videos, ppa):
     queue = []
     for account_idx, acc in enumerate(accounts):
         for post_num in range(1, ppa + 1):
-            video_idx = (account_idx + post_num - 1) % num_videos
+            video_idx = (account_idx * ppa + post_num - 1) % num_videos
             queue.append({
                 "account": acc["model_name"],
                 "ig_user_id": acc["ig_user_id"],
