@@ -1,0 +1,18 @@
+services:
+  bot:
+    env_file:
+      - /path/to/cristiano/.env
+    image: reelshift-graph:latest
+    container_name: reelshift-graph-cristiano
+    restart: unless-stopped
+    user: "997:986"
+    environment:
+      REELSHIFT_DATA_DIR: /data
+      TZ: America/New_York
+      TELEGRAM_API_BASE_URL: http://telegram_bot_api:8081
+    volumes:
+      - /path/to/cristiano:/data:rw
+      - /opt/reelshift-graph/app:/app:ro
+      - reelshift_telegram-bot-api-data:/var/lib/telegram-bot-api:ro
+    networks:
+      - reelshift_default
