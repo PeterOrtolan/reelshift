@@ -604,7 +604,7 @@ async def cmd_igcampaign(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # each account needs UNIQUE source videos to avoid IG duplicate detection.
     # If SKIP_VARIANTS=0, ffmpeg makes each variant unique — shared videos are fine.
     _ppa_for_pull = igcampaign_n if igcampaign_n else len(bot_cfg.get("windows", []))
-    if _ppa_for_pull:
+    if _ppa_for_pull and (os.getenv("SKIP_VARIANTS") == "1" or os.getenv("UNIQUE_CONTENT_PER_ACCOUNT") == "1"):
         _num_accs_pull = len(accounts_mod.list_accounts())
         videos_to_pull = _num_accs_pull * _ppa_for_pull
         log.info(f"SKIP_VARIANTS=1: pulling {videos_to_pull} videos ({_num_accs_pull} accounts x {_ppa_for_pull} posts — unique content per account)")
