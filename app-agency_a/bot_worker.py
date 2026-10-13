@@ -600,6 +600,7 @@ async def cmd_igcampaign(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # All-or-nothing: fail cleanly if fewer than N fresh videos available.
     # No source configured → old manual behavior (backward compat).
     source_cfg = sources_mod.get_source_config()
+    bot_cfg = context.application.bot_data.get("bot_config", {})
     # Smart content pull: if SKIP_VARIANTS=1 (no ffmpeg transforms),
     # each account needs UNIQUE source videos to avoid IG duplicate detection.
     # If SKIP_VARIANTS=0, ffmpeg makes each variant unique — shared videos are fine.
