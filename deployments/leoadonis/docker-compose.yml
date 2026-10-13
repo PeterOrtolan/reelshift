@@ -1,0 +1,38 @@
+services:
+  bot:
+    env_file:
+      - /opt/reelshift-graph/deployments/leoadonis/.env
+    image: reelshift-graph:latest
+    container_name: reelshift-graph-leoadonis
+    restart: unless-stopped
+    user: "1000:1000"
+    group_add:
+      - "101"
+    environment:
+      REELSHIFT_DATA_DIR: /data
+      TZ: America/New_York
+      TELEGRAM_API_BASE_URL: http://telegram_bot_api:8081
+    volumes:
+      - /opt/reelshift-graph/deployments/leoadonis:/data:rw
+      - /opt/reelshift-graph/app:/app:ro
+      - reelshift_telegram-bot-api-data:/var/lib/telegram-bot-api:ro
+    networks:
+      - reelshift_default
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+    deploy:
+      resources:
+        limits:
+          cpus: "1.5"
+          memory: 1G
+
+volumes:
+  reelshift_telegram-bot-api-data:
+    external: true
+
+networks:
+  reelshift_default:
+    external: true
