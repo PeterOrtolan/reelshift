@@ -623,6 +623,32 @@ async def cmd_igcampaign(update: Update, context: ContextTypes.DEFAULT_TYPE):
             context.application.bot_data.pop("igcampaign_n", None)
             await pull_status.edit_text(f"❌ Auto-pull failed: {_e}")
             return
+        # FRESH_CONTENT_RESET: auto-reset + retry + notify when not enough content
+        if len(_items) < videos_to_pull:
+            try:
+                await update.effective_chat.send_message(
+                    f"\U0001f504 Not enough fresh content ({len(_items)}/{videos_to_pull}). Resetting tracking to restart from oldest..."
+                )
+            except Exception:
+                pass
+            import sqlite3 as _sq3
+            _sdb = os.path.join(os.environ.get("REELSHIFT_DATA_DIR", "/data"), "state", "sources.db")
+            if os.path.exists(_sdb):
+                _db = _sq3.connect(_sdb)
+                _db.execute("DELETE FROM source_items")
+                _db.commit()
+                _db.close()
+                log.info("FRESH_CONTENT_RESET: cleared sources.db, retrying")
+            _items = await asyncio.to_thread(sources_mod.pull_pool, videos_to_pull)
+            if _items:
+                try:
+                    await update.effective_chat.send_message(
+                        f"\u2705 Content reset complete. Pulled {len(_items)} videos from oldest content."
+                    )
+                except Exception:
+                    pass
+
+        # Original check (only triggers if retry also failed)
         if len(_items) < videos_to_pull:
             context.user_data.pop("igcampaign_n", None)
             context.application.bot_data.pop("igcampaign_n", None)
